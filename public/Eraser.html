@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppression des photos</title>
+  <link rel="icon" href="./Icons/Méthode.KOLUJ.ico" type="image/x-icon" />
+    <link
+      rel="shortcuticon"
+      href="./Icons/Méthode.KOLUJ.ico"
+      type="image/x-icon" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@700&display=swap');
+
+    body {
+      font-family: 'Zilla Slab', serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    h1 {
+      text-align: center;
+      color: #f39c12;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px 5px #000;
+      text-transform: uppercase;
+    }
+
+    #imageList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .imageItem {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .imageItem img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border: 1px solid #555;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .imageItem button {
+      padding: 10px 15px;
+      background-color: #c0392b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .imageItem button:hover {
+      background-color: #e74c3c;
+    }
+
+    .imageItem:hover {
+      transform: scale(1.2);
+      background-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    #passwordSection {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #passwordInput {
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    #homeButton {
+      display: block;
+      margin: 30px auto;
+      padding: 15px 30px;
+      background-color: #333;
+      color: #f39c12;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    #homeButton:hover {
+      background-color: #444;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+  <script>
+    async function fetchImages() {
+      const response = await fetch('/images');
+      const images = await response.json();
+      const imageList = document.getElementById('imageList');
+      imageList.innerHTML = '';
+
+      images.forEach(image => {
+        const listItem = document.createElement('li');
+        listItem.className = 'imageItem';
+
+        const img = document.createElement('img');
+        img.src = `/images/${image}`;
+        img.alt = image;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.onclick = async () => {
+          const password = document.getElementById('passwordInput').value;
+
+          if (!password) {
+            alert("Mot de passe requis pour supprimer l'image");
+            return;
+          }
+
+          const response = await fetch(`/images/${image}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password })
+          });
+
+          if (response.ok) {
+            fetchImages(); 
+          } else {
+            alert(`${password} n'est pas le mot de passe administrateur !`);
+          }
+        };
+
+        listItem.appendChild(img);
+        listItem.appendChild(deleteButton);
+        imageList.appendChild(listItem);
+      });
+    }
+
+    window.onload = fetchImages;
+  </script>
+</head>
+<body>
+  <h1>Suppression des photos</h1>
+<div id="passwordSection">
+    <input type="password" id="passwordInput" placeholder="Mot de passe">
+  </div>
+  <ul id="imageList"></ul>
+  <a id="homeButton" href="./Galerie.html">FINI !</a>
+</body>
+</html>
